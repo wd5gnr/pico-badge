@@ -23,7 +23,9 @@ Sexit() - Not necessary at end, but useful if you want to end early for testing
 
 // Load images here
 // You can generate these include files using something like
-// https://javl.github.io/image2cpp/ (b&w) or use GIMP to export them to a .C file (see notes.md)
+// https://javl.github.io/image2cpp/ (b&w) or
+// https://lvgl.io/tools/imageconverter (color) or
+//  use GIMP to export them to a .C file (see notes.md)
 // Image must be mono or RGB565 and must be 240x240
 #include "wrencher.h"  // black and white
 #include "head2gimp.h"  // RGB565 image

@@ -54,7 +54,8 @@ typedef struct
 	}        \
 	;
 #define Sclear(c) {CLEAR, NULL, NULL, c, 0},
-#define Sbwimg(img) {BWIMG, NULL, img, 0, 0},
+#define Sbwimg(img) {BWIMG, NULL, img, WHITE, BLACK},
+#define S2img(img,c1,c2) { BWIMG, NULL, img, c1, c2 },
 #define Simage(img) {COLORIMG, NULL, (const uint8_t *)img, 0, 0},
 #define Sdelay(ms) {MSDELAY, NULL, NULL, ms, 0},
 #define Stxtsize(sz) {TSIZE, NULL, NULL, sz, 0},
