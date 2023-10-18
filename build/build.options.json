@@ -1,5 +1,5 @@
 {
-  "additionalFiles": "../../..,../../..,../..,../..,../..,../..,../..",
+  "additionalFiles": "../../..,../../..,../..,../..,../..,../..,../..,../..,../..,../..",
   "builtInToolsFolders": "",
   "compiler.optimization_flags": "",
   "customBuildProperties": "",
@@ -7,5 +7,5 @@
   "hardwareFolders": "/home/alw/.arduino15/packages",
   "otherLibrariesFolders": "/home/alw/Arduino/libraries",
   "runtime.ide.version": "10607",
-  "sketchLocation": "/home/alw/projects/embedded/ltest"
+  "sketchLocation": "/home/alw/projects/embedded/pico-badge"
 }

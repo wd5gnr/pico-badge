@@ -10,27 +10,27 @@
     "Includepath": "/home/alw/.arduino15/packages/rp2040/hardware/rp2040/3.4.1/variants/waveshare_rp2040_lcd_1_28"
   },
   {
-    "Sourcefile": "/home/alw/projects/embedded/ltest/build/sketch/ltest.ino.cpp",
+    "Sourcefile": "/home/alw/projects/embedded/pico-badge/build/sketch/pico-badge.ino.cpp",
     "Include": "U8g2lib.h",
     "Includepath": "/home/alw/Arduino/libraries/U8g2/src"
   },
   {
-    "Sourcefile": "/home/alw/projects/embedded/ltest/build/sketch/ltest.ino.cpp",
+    "Sourcefile": "/home/alw/projects/embedded/pico-badge/build/sketch/pico-badge.ino.cpp",
     "Include": "Arduino_GFX_Library.h",
     "Includepath": "/home/alw/Arduino/libraries/GFX_Library_for_Arduino/src"
   },
   {
-    "Sourcefile": "/home/alw/projects/embedded/ltest/build/sketch/ltest.ino.cpp",
+    "Sourcefile": "/home/alw/projects/embedded/pico-badge/build/sketch/pico-badge.ino.cpp",
     "Include": "SPI.h",
     "Includepath": "/home/alw/.arduino15/packages/rp2040/hardware/rp2040/3.4.1/libraries/SPI/src"
   },
   {
-    "Sourcefile": "/home/alw/projects/embedded/ltest/build/sketch/ltest.ino.cpp",
+    "Sourcefile": "/home/alw/projects/embedded/pico-badge/build/sketch/pico-badge.ino.cpp",
     "Include": "Wire.h",
     "Includepath": "/home/alw/.arduino15/packages/rp2040/hardware/rp2040/3.4.1/libraries/Wire/src"
   },
   {
-    "Sourcefile": "/home/alw/projects/embedded/ltest/build/sketch/ltest.ino.cpp",
+    "Sourcefile": "/home/alw/projects/embedded/pico-badge/build/sketch/pico-badge.ino.cpp",
     "Include": "",
     "Includepath": null
   },

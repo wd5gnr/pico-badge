@@ -1,4 +1,4 @@
-/home/alw/projects/embedded/ltest/build/libraries/U8g2/U8x8lib.cpp.o: \
+/home/alw/projects/embedded/pico-badge/build/libraries/U8g2/U8x8lib.cpp.o: \
  /home/alw/Arduino/libraries/U8g2/src/U8x8lib.cpp \
  /home/alw/Arduino/libraries/U8g2/src/U8x8lib.h \
  /home/alw/.arduino15/packages/rp2040/hardware/rp2040/3.4.1/cores/rp2040/Arduino.h \

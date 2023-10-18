@@ -1,4 +1,4 @@
-#line 1 "/home/alw/projects/embedded/ltest/head2gimp.h"
+#line 1 "/home/alw/projects/embedded/pico-badge/head2gimp.h"
 /* GIMP RGB C-Source image dump (test.bmp.c) */
 
 const char *headphone240 PROGMEM =

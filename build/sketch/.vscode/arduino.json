@@ -1,6 +1,6 @@
-#line 1 "/home/alw/projects/embedded/ltest/.vscode/arduino.json"
+#line 1 "/home/alw/projects/embedded/pico-badge/.vscode/arduino.json"
 {
-    "sketch": "ltest.ino",
+    "sketch": "pico-badge.ino",
     "output": "build",
     "configuration": "flash=2097152_0,freq=133,opt=Optimize2,rtti=Disabled,stackprotect=Enabled,exceptions=Disabled,dbgport=Disabled,dbglvl=None,usbstack=picosdk,ipbtstack=ipv4only,uploadmethod=default",
     "board": "rp2040:rp2040:waveshare_rp2040_lcd_1_28",

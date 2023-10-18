@@ -1,4 +1,4 @@
-/home/alw/projects/embedded/ltest/build/libraries/Wire/Wire.cpp.o: \
+/home/alw/projects/embedded/pico-badge/build/libraries/Wire/Wire.cpp.o: \
  /home/alw/.arduino15/packages/rp2040/hardware/rp2040/3.4.1/libraries/Wire/src/Wire.cpp \
  /home/alw/.arduino15/packages/rp2040/hardware/rp2040/3.4.1/cores/rp2040/Arduino.h \
  /home/alw/.arduino15/packages/rp2040/hardware/rp2040/3.4.1/cores/rp2040/stdlib_noniso.h \

@@ -1,4 +1,4 @@
-/home/alw/projects/embedded/ltest/build/libraries/GFX_Library_for_Arduino/display/Arduino_ST7789.cpp.o: \
+/home/alw/projects/embedded/pico-badge/build/libraries/GFX_Library_for_Arduino/display/Arduino_ST7789.cpp.o: \
  /home/alw/Arduino/libraries/GFX_Library_for_Arduino/src/display/Arduino_ST7789.cpp \
  /home/alw/Arduino/libraries/GFX_Library_for_Arduino/src/display/Arduino_ST7789.h \
  /home/alw/.arduino15/packages/rp2040/hardware/rp2040/3.4.1/cores/rp2040/Arduino.h \

@@ -86,19 +86,51 @@ typedef struct
 #define JPR_MASK 256
 unsigned readpins(void);  // script might want this
 
+volatile uint16_t buttons=0;  // buttons read by processor #1
+uint16_t getbtns(void)
+{
+	uint16_t rv;
+	rp2040.idleOtherCore();
+	rv|=buttons;
+	buttons = 0;
+	rp2040.resumeOtherCore();
+	return rv;
+}
+
+int dscale = 1;
+
+void scaledelay(unsigned n)
+{
+	delay(n * dscale);
+}
+
+void delayscaler(int offset)
+{
+	if (dscale+offset<1)
+		dscale = 1;
+	else if (dscale+offset>10)
+		dscale = 10;
+	else
+		dscale += offset;
+}
+
 
 
 #include "script.h"
 
 unsigned ipins[] = {BTNA, BTNB, BTNC, BTND, JUP, JDN, JLF, JRT, JPR};
 
-void initIO()
+void initIO1()
 {
 	for (int i = 0; i < sizeof(ipins) / sizeof(ipins[0]); i++)
 	{
 		pinMode(ipins[i], INPUT_PULLUP);
 	}
-	pinMode(LCDBL, OUTPUT);
+}
+
+void initIO()
+{
+ 	pinMode(LCDBL, OUTPUT);
 	digitalWrite(LCDBL, HIGH); // shouldn't be needed
 }
 
@@ -112,10 +144,23 @@ unsigned readpins(void)
 			rv |= mask;
 		mask <<= 1;
 	}
-	return 0x1FF ^ rv;
+	return 0x1FF ^ rv;  // active low buttons so flip 'em
 }
 
 
+void setup1() // second core will handle buttons
+{
+	initIO1();
+}
+
+
+void loop1()
+{
+	rp2040.idleOtherCore();
+	buttons|=readpins();
+	rp2040.resumeOtherCore();
+	delay(5);
+}
 
 void setup()
 {
@@ -139,14 +184,14 @@ void loop()
 	int maxstep = sizeof(script)/ sizeof(script[0]);
 	for (int i = 0; i < maxstep; i++)
 	{
-		customize(0, i, maxstep, readpins());
+		customize(0, i, maxstep, getbtns());
 		switch (script[i].type)
 		{
 		case CLEAR:
 			gfx->fillScreen(script[i].arg);
 			break;
 		case MSDELAY:
-			delay(script[i].arg);
+			scaledelay(script[i].arg);
 			break;
 		case TCOLOR:
 			gfx->setTextColor(script[i].arg, script[i].arg2);
@@ -159,28 +204,30 @@ void loop()
 
 			int16_t x0, y0;
 			uint16_t w, h;
-			x0 = script[i].arg;
+			x0 = script[i].arg;  // assume we are at XY
 			y0 = script[i].arg2;
-			if (script[i].arg < 0 || script[i].arg2 < 0)
+			if (script[i].arg < 0 || script[i].arg2 < 0)  // if either axis is centered
 			{
-				gfx->getTextBounds(script[i].text, 0, 0, &x0, &y0, &w, &h);
-				if (script[i].arg < 0)
+				gfx->getTextBounds(script[i].text, 0, 0, &x0, &y0, &w, &h);  // get box around text
+				if (script[i].arg < 0)  // if we want to center on X
 					x0 = (240 - w) / 2;
 				else
-					x0 = script[i].arg;
-				if (script[i].arg2 < 0)
+					x0 = script[i].arg;   // reset x0 because only y?
+				if (script[i].arg2 < 0)   // if we want to center on y
 					{
-					y0 = (240 - h) / 2;
-					y0 += h / 2;
+					y0 = (240 - h) / 2;  
+					y0 += h;
 					}
 				else
-					y0 = script[i].arg2;
+					y0 = script[i].arg2;  // reset y0 because only x?
 			}
-			if (x0 > 500)
+			if (x0 > 500)  // if x0 is bigger than screen use current x
 				x0 = gfx->getCursorX();
-			if (y0 > 500)
+			if (y0 > 500)    // if y0 is bigger than screen use current y
 				y0 = gfx->getCursorY();
-			gfx->setCursor(x0, y0);
+// go to whatever we figured out
+			gfx->setCursor(x0, y0);    
+// print text			
 			gfx->print(script[i].text);
 		}
 		break;
@@ -206,6 +253,6 @@ void loop()
 			return; // end loop and start again later
 			break;	// never reached!
 		}
-		customize(1, i,maxstep,readpins());
+		customize(1, i,maxstep,getbtns());
 	}
 }

@@ -1,4 +1,4 @@
-/home/alw/projects/embedded/ltest/build/libraries/GFX_Library_for_Arduino/databus/Arduino_HWSPI.cpp.o: \
+/home/alw/projects/embedded/pico-badge/build/libraries/GFX_Library_for_Arduino/databus/Arduino_HWSPI.cpp.o: \
  /home/alw/Arduino/libraries/GFX_Library_for_Arduino/src/databus/Arduino_HWSPI.cpp \
  /home/alw/Arduino/libraries/GFX_Library_for_Arduino/src/databus/Arduino_HWSPI.h \
  /home/alw/.arduino15/packages/rp2040/hardware/rp2040/3.4.1/libraries/SPI/src/SPI.h \
