@@ -1,6 +1,8 @@
 #ifndef __PICO_BADGE_H
 #define __PICO_BADGE_H
 
+// Main header for pico badge
+
 #include <U8g2lib.h>  // for fonts
 #include <Arduino_GFX_Library.h>  // for graphics
 
@@ -19,7 +21,7 @@
 
 
 
-
+// Script commands
 typedef enum
 {
 	CLEAR,
@@ -35,6 +37,7 @@ typedef enum
 	END
 } SCRIPTTYPE;
 
+// Each step of a script
 typedef struct
 {
 	SCRIPTTYPE type;
@@ -44,6 +47,7 @@ typedef struct
 	int arg2;
 } SCRIPT;
 
+// Preprocessor macros to create script
 #define Sbegin SCRIPT script[] = {
 #define Send \
     }        \
@@ -64,24 +68,29 @@ typedef struct
 #define Stag(n) { TAG, NULL, NULL, n, 0},
 #define Sexit() {END, NULL, NULL, 0, 0}, // not needed unless early exit
 
+// Use this if you want no customize function
 #define NO_CUSTOM \
 	void customize(int prepost, int &frame, unsigned max, unsigned buttons) {}
 
-
+// center text axis
 #define TCENTER -1
+// use current text position
 #define TCURRENT 999
+
+// The actual BADGE class
 
 class BADGE
 {
 	protected:
-		static int pauseval;
-		static int loopstartval;
-		static int loopmaxval;
-        static int dscale;
+		static int pauseval;    // frame to pause
+		static int loopstartval;  // start of loop (frame)
+		static int loopmaxval;   // end of loop (frame)
+        static int dscale;      // delay scale (1-10 multiplier for delays)
 
     public:
-        static uint16_t getbtns(void);
-    // note these are rearranged from the board layout
+        static uint16_t getbtns(void);   // get physical buttons
+    // The various switches show up with these bits
+	// note these are rearranged from the board layout
 	enum { BTNA_MASK = 8,
 				  BTNB_MASK = 4,
 				  BTNC_MASK = 2,
@@ -91,31 +100,35 @@ class BADGE
 				  JLF_MASK = 128,
 				  JRT_MASK = 64,
 				  JPR_MASK = 256 };
-	static void scaledelay(unsigned n); 
-    static void delayscaler(int offset);
-    static void on(void);
-    static void off(void);
-    static int findTag(int tag);
-    static int pause(void) { return pauseval; }
-	static void pause(int tag, int type=0) { pauseval = type?tag:(findTag(tag) + 1); }
-	static void unpause(void) { pauseval = -1; }
-	static void unloop(void) { loopstartval=loopmaxval = -1; }
-	static void setloop(int tag0, int tag1, int pause=0, int type0 = 0, int type1 = 0);
-	static void pausehere(int n) { pauseval = n; };
-// probably won't use these
-	static int loopstart(void) { return loopstartval;  }
-	static void loopstart(int tag, int type = 0) { loopstartval = type ? tag:(findTag(tag) + 1);  }
-	static int loopmax(void) { return loopmaxval;  }
-	static void loopmax(int tag, int type=0) { loopmaxval = type?tag:findTag(tag);  }
+	static void scaledelay(unsigned n);   // delay in ms with scale
+    static void delayscaler(int offset);   // setup scale for delays
+    static void on(void);   // display on
+    static void off(void);  // or off
+    static int findTag(int tag);  // find tag and return sequence number
+    static int pause(void) { return pauseval; }  // read pause
+	static void pause(int tag, int type=0) { pauseval = type?tag:(findTag(tag) + 1); }  // set pause (type=0 is tag, non-zero is frame)
+	static void unpause(void) { pauseval = -1; }   // stop pause
+	static void unloop(void) { loopstartval=loopmaxval = -1; }  // stop loop
+	static void setloop(int tag0, int tag1, int pause=0, int type0 = 0, int type1 = 0);  // Set loop easily
+	static void pausehere(int n) { pauseval = n; }; // pause on frame number
+	// user probably doesn't need these
+   static int loopstart(void) { return loopstartval;  }
+   static void loopstart(int tag, int type = 0) { loopstartval = type ? tag:(findTag(tag) + 1);  }
+   static int loopmax(void) { return loopmaxval;  }
+   static void loopmax(int tag, int type=0) { loopmaxval = type?tag:findTag(tag);  }
 	};
 
-
+// your script
 extern SCRIPT script[];
+// your customzie function (see NO_CUSTOM)
 extern void customize(int prepost, int &frame, unsigned max, unsigned buttons);
+// see if a button is pending
 extern int btn_pending(void);
+// library for graphics
 extern Arduino_GFX *gfx;
+// The external font size
 extern unsigned script_size;
-
+// Get buttons (raw)
 uint16_t getbtns(void); // should not use directly
 
 #endif

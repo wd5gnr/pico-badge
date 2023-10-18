@@ -189,34 +189,39 @@ void customize(int prepost, int &frame, unsigned max, unsigned cbuttons)
   }
   if (buttons & BADGE::JPR_MASK)
   {
-    static int toggle= 0;
+    static int toggle= 0;  // press joystick down to toggle screen on/off
     toggle ^= 1;
     if (toggle)
       BADGE::off();
     else
       BADGE::on();
   }
-  if (buttons & BADGE::JLF_MASK)  // reverse
+  if (buttons & BADGE::JLF_MASK)  // joystick left go back to first frame
   {
     frame = 0;
   }
-  if (buttons & BADGE::JUP_MASK)
+  if (buttons & BADGE::JUP_MASK)  // Up -- slower
   {
     BADGE::delayscaler(1);
   }
-  if (buttons & BADGE::JDN_MASK)
+  if (buttons & BADGE::JDN_MASK)  // down -- faster
   {
     BADGE::delayscaler(-1);
   }
   if (buttons & BADGE::BTNC_MASK) // Button C pause
   {
-    BADGE::pausehere(frame);
+    // need something for button C
   }
-  if (buttons & BADGE::BTND_MASK)  
-  {// BTN D pause off
-    BADGE::unpause();
-    BADGE::unloop(); 
-    return;
+  if (buttons & BADGE::BTND_MASK)  // Button D pause toggle
+  {
+    if (BADGE::pause()>=0)
+    {
+      BADGE::unpause();
+      BADGE::unloop();
+    }
+      else
+        BADGE::pausehere(frame);
+      return;
   }
 
 // If BTN A we are going to run from MAINFRAME to MAINFREND
