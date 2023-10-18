@@ -1,20 +1,8 @@
 #include <Arduino.h>
-#include <U8g2lib.h>
-#include <Arduino_GFX_Library.h>
+#include "pico-badge.h"
 
-#define BTNA 15
-#define BTNB 17
-#define BTNC 19
-#define BTND 21
-#define JUP 2
-#define JDN 18
-#define JLF 16
-#define JRT 20
-#define JPR 3
 
-#define LCDBL 13 // incorrect in board support?
-
-Arduino_DataBus *bus = new Arduino_RPiPicoSPI(
+static Arduino_DataBus *bus = new Arduino_RPiPicoSPI(
 	PIN_LCD_DC,
 	PIN_LCD_CS,
 	PIN_LCD_SCLK,
@@ -26,101 +14,28 @@ Arduino_GFX *gfx = new Arduino_ST7789(bus, PIN_LCD_RST, 3, true, 320, 320, 0, 0,
 
 
 
-typedef enum
-{
-	CLEAR,
-	TEXT,
-	TSIZE,
-	TCOLOR,
-	BWIMG,
-	COLORIMG,
-	MSDELAY,
-	ONOFF,
-	FONT,
-	END
-} SCRIPTTYPE;
 
-typedef struct
-{
-	SCRIPTTYPE type;
-	const char *text;
-	const uint8_t *data;
-	int arg;
-	int arg2;
-} SCRIPT;
+volatile static uint16_t buttons = 0; // buttons read by processor #1
 
-#define Sbegin SCRIPT script[] = {
-#define Send \
-	}        \
-	;
-#define Sclear(c) {CLEAR, NULL, NULL, c, 0},
-#define Sbwimg(img) {BWIMG, NULL, img, WHITE, BLACK},
-#define S2img(img,c1,c2) { BWIMG, NULL, img, c1, c2 },
-#define Simage(img) {COLORIMG, NULL, (const uint8_t *)img, 0, 0},
-#define Sdelay(ms) {MSDELAY, NULL, NULL, ms, 0},
-#define Stxtsize(sz) {TSIZE, NULL, NULL, sz, 0},
-#define Stxtcolor(fg, bg) {TCOLOR, NULL, NULL fg, bg},
-#define Stxttrans(fg) {TCOLOR, NULL, NULL, fg, fg},
-#define Stext(x, y, t) {TEXT, t, NULL, x, y},
-#define Sfont(fn) { FONT, NULL, u8g2_font_ ## fn, 0, 0 },
-#define Son() {ONOFF, NULL, NULL, 1, 0},
-#define Soff() {ONOFF, NULL, NULL, 0, 0},
-#define Sexit() {END, NULL, NULL, 0, 0}, // not needed unless early exit
+int btn_pending(void) { return buttons!=0; }
 
-#define NO_CUSTOM \
-	void customize(int prepost, int &frame, unsigned max, unsigned buttons) {}
-
-
-#define TCENTER -1
-#define TCURRENT 999
-
-// Flip these around to our orientation (not the board markings)
-#define BTNA_MASK 8
-#define BTNB_MASK 4
-#define BTNC_MASK 2
-#define BTND_MASK 1
-#define JUP_MASK 32
-#define JDN_MASK 16
-#define JLF_MASK 128
-#define JRT_MASK 64
-#define JPR_MASK 256
-unsigned readpins(void);  // script might want this
-
-volatile uint16_t buttons=0;  // buttons read by processor #1
 uint16_t getbtns(void)
-{
-	uint16_t rv;
-	rp2040.idleOtherCore();
-	rv|=buttons;
-	buttons = 0;
-	rp2040.resumeOtherCore();
-	return rv;
-}
-
-int dscale = 1;
-
-void scaledelay(unsigned n)
-{
-	delay(n * dscale);
-}
-
-void delayscaler(int offset)
-{
-	if (dscale+offset<1)
-		dscale = 1;
-	else if (dscale+offset>10)
-		dscale = 10;
-	else
-		dscale += offset;
+	{
+		uint16_t rv;
+		rp2040.idleOtherCore();
+		rv = buttons;
+		buttons = 0;
+		rp2040.resumeOtherCore();
+		return rv;
 }
 
 
 
-#include "script.h"
 
-unsigned ipins[] = {BTNA, BTNB, BTNC, BTND, JUP, JDN, JLF, JRT, JPR};
 
-void initIO1()
+static unsigned ipins[] = {BTNA, BTNB, BTNC, BTND, JUP, JDN, JLF, JRT, JPR};
+
+static void initIO1()
 {
 	for (int i = 0; i < sizeof(ipins) / sizeof(ipins[0]); i++)
 	{
@@ -128,13 +43,13 @@ void initIO1()
 	}
 }
 
-void initIO()
+static void initIO()
 {
  	pinMode(LCDBL, OUTPUT);
 	digitalWrite(LCDBL, HIGH); // shouldn't be needed
 }
 
-unsigned readpins(void)
+static unsigned readpins(void)
 {
 	int i;
 	unsigned rv = 0, mask = 1;
@@ -153,13 +68,27 @@ void setup1() // second core will handle buttons
 	initIO1();
 }
 
+static unsigned readdebounce(void)
+{
+	unsigned s1, s2;
+	s1 = readpins();
+	delay(33);  // debounce delay
+	s2 = readpins();
+	return s1 & s2;  // must be on both times
+}
 
 void loop1()
 {
+	static unsigned btnstate = 0;
+	static unsigned xbtn;
+	unsigned cbutton;
+	cbutton = readdebounce();  // current buttons
+	xbtn = cbutton & ~btnstate;  // turn off any that were on before
+	btnstate = cbutton;   // ready for next time
 	rp2040.idleOtherCore();
-	buttons|=readpins();
+	buttons |= xbtn; // put in any that are set; client will reset them
 	rp2040.resumeOtherCore();
-	delay(5);
+	delay(5); // give other core some time to run
 }
 
 void setup()
@@ -181,17 +110,39 @@ void setup()
 
 void loop()
 {
-	int maxstep = sizeof(script)/ sizeof(script[0]);
+	static int looping = -1;
+	int maxstep = script_size;
 	for (int i = 0; i < maxstep; i++)
 	{
+		if (BADGE::loopstart() >= 0)
+			if (looping<0) looping=i = BADGE::loopstart();
+			else
+				i = looping++;
+
+		if (BADGE::loopmax()>=0 && i>=BADGE::loopmax())
+		{
+			if (BADGE::pause()>=0)
+			{
+				BADGE::pause(i,1);
+				BADGE::unloop();
+				looping = -1;
+			}
+			else
+				looping = BADGE::loopstart();
+			break;
+		}
+		if (BADGE::pause()>=0 && BADGE::loopstart()<0)
+			i = BADGE::pause();
 		customize(0, i, maxstep, getbtns());
 		switch (script[i].type)
 		{
+		case TAG:
+			continue;  // just a label
 		case CLEAR:
 			gfx->fillScreen(script[i].arg);
 			break;
 		case MSDELAY:
-			scaledelay(script[i].arg);
+			BADGE::scaledelay(script[i].arg);
 			break;
 		case TCOLOR:
 			gfx->setTextColor(script[i].arg, script[i].arg2);
