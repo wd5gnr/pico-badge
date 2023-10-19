@@ -15,3 +15,5 @@ U8g2 (fonts)
 SPI
 
 The RP2040 board package, of course
+
+See the comments in script.cpp to customize without much trouble. Also see notes.md for notes about converting graphics.

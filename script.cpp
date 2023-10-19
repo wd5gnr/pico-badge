@@ -35,6 +35,7 @@ Sexit() - Not necessary at end, but useful if you want to end early for testing
 #include "head2gimp.h"  // RGB565 image
 #include "qr-code.h"  // QR code for github
 #include "monoback.h"  // two different backgrounds (black/white and white/black)
+#include "ncc1701.h"  // USS Enterprise
 
 // setup
 int tdelay = 2000;
@@ -62,6 +63,24 @@ Sbegin
   Simage(headphone240)
   Sdelay(tdelay)
 
+// Call sign
+  Stag(35)
+  Stxtsize(2)
+  Sfont(helvB24_tr)
+  Sbwimg(monobk)
+  Stxttrans(RED)
+  Stext(TCENTER,60,"---... ...--")
+  Stxttrans(WHITE)
+  Stxtsize(1)
+  Stext(TCENTER,180,"WD5GNR")
+  Sdelay(tdelay)
+
+  Stag(36)
+  Simage(enterprise)
+  Stext(0,30,"SUPER")
+  Stext(150,180,"CON")
+  Sdelay(tdelay)
+
 // Fancy name
   Stag(40)
   Sclear(BLUE)
@@ -74,7 +93,7 @@ Sbegin
 // Show GithHub QR Code
   Stag(50)
   Sbwimg(qrcode)
-  Sdelay(tdelay)
+  Sdelay(tdelay*2)
 
 // Hackaday name plate
   Stag(60)
@@ -89,8 +108,6 @@ Sbegin
   Stag(9999)     // Elliot's favorite EOF marker
 
 Send
-
-
 
 // clang-format on
 
@@ -158,7 +175,7 @@ D - Resume from A, B, or C
 #define MAINFRAME 60
 #define MAINFREND 9999
 
-void customize(int prepost, int &frame, unsigned max, unsigned cbuttons)
+    void customize(int prepost, int &frame, unsigned max, unsigned cbuttons)
 {
   static unsigned sbuttons = 0;
   unsigned buttons;
@@ -240,7 +257,7 @@ void customize(int prepost, int &frame, unsigned max, unsigned cbuttons)
 }
 #else
 
-NO_CUSTOM
+    NO_CUSTOM
 
 #endif
 
