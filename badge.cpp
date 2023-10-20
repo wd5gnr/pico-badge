@@ -8,18 +8,37 @@
 namespace BADGE
 {
 
-	int dscale = 1; // delay scaling
-	// variables for pausing and looping
-	int pauseval = -1;
-	int loopstartval = -1;
-	int loopmaxval = -1;
+	// all of these variables are private to the namespace
+	namespace
+	{
+		int dscale = 1; // delay scaling
+		// variables for pausing and looping
+		int pauseval = -1;
+		int loopstartval = -1;
+		int loopmaxval = -1;
+	}
 
-	int pause(void) { return pauseval; }											  // read pause
-	void pause(int tag, int type) { pauseval = type ? tag : (findTag(tag) + 1); } // set pause (type=0 is tag, non-zero is frame)
-	void unpause(void) { pauseval = -1; }											  // stop pause
-	void unloop(void) { loopstartval = loopmaxval = -1; }							  // stop loop
-	void pausehere(int n) { pauseval = n; };										  // pause on frame number
-																					  // user probably doesn't need these
+	int pause(void)
+	{
+		return pauseval;
+	}							  // read pause
+	void pause(int tag, int type) // set pause (type=0 is tag, non-zero is frame)
+	{
+		pauseval = type ? tag : (findTag(tag) + 1);
+	}
+	void unpause(void) // stop pause
+	{
+		pauseval = -1;
+	}
+	void unloop(void) // stop loop
+	{
+		loopstartval = loopmaxval = -1;
+	}
+	void pausehere(int n) // pause on frame number
+	{
+		pauseval = n;
+	};
+	// user probably doesn't need these
 	int loopstart(void) { return loopstartval; }
 	void loopstart(int tag, int type) { loopstartval = type ? tag : (findTag(tag) + 1); }
 	int loopmax(void) { return loopmaxval; }
