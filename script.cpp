@@ -88,6 +88,15 @@ Sbegin
   S2img(wrencher,GREEN,BLACK)
   Sdelay(tdelay)
 
+  // Standard wrencher
+  Stag(38)
+  S2img(wrencher,RGB565(243,191,16),BLACK)
+  Sdelay(tdelay)
+
+  Stag(39)
+  Sbwimg(wrencher)
+  Sdelay (tdelay)
+  
 
 // Fancy name
   Stag(40)
