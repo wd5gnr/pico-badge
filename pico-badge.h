@@ -79,16 +79,10 @@ typedef struct
 
 // The actual BADGE class
 
-class BADGE
+namespace BADGE
 {
-	protected:
-		static int pauseval;    // frame to pause
-		static int loopstartval;  // start of loop (frame)
-		static int loopmaxval;   // end of loop (frame)
-        static int dscale;      // delay scale (1-10 multiplier for delays)
 
-    public:
-        static uint16_t getbtns(void);   // get physical buttons
+	 uint16_t getbtns(void);   // get physical buttons
     // The various switches show up with these bits
 	// note these are rearranged from the board layout
 	enum { BTNA_MASK = 8,
@@ -100,23 +94,23 @@ class BADGE
 				  JLF_MASK = 128,
 				  JRT_MASK = 64,
 				  JPR_MASK = 256 };
-	static void scaledelay(unsigned n);   // delay in ms with scale
-    static void delayscaler(int offset);   // setup scale for delays
-    static void on(void);   // display on
-    static void off(void);  // or off
-    static int findTag(int tag);  // find tag and return sequence number
-    static int pause(void) { return pauseval; }  // read pause
-	static void pause(int tag, int type=0) { pauseval = type?tag:(findTag(tag) + 1); }  // set pause (type=0 is tag, non-zero is frame)
-	static void unpause(void) { pauseval = -1; }   // stop pause
-	static void unloop(void) { loopstartval=loopmaxval = -1; }  // stop loop
-	static void setloop(int tag0, int tag1, int pause=0, int type0 = 0, int type1 = 0);  // Set loop easily
-	static void pausehere(int n) { pauseval = n; }; // pause on frame number
+	void scaledelay(unsigned n);   // delay in ms with scale
+    void delayscaler(int offset);   // setup scale for delays
+    void on(void);   // display on
+    void off(void);  // or off
+    int findTag(int tag);  // find tag and return sequence number
+	int pause(void);	   // read pause
+	void pause(int tag, int type = 0);
+	void unpause(void);									 // stop pause
+	void unloop(void);									 // stop loop
+	void setloop(int tag0, int tag1, int pause=0, int type0 = 0, int type1 = 0);  // Set loop easily
+	void pausehere(int n); // pause on frame number
 	// user probably doesn't need these
-   static int loopstart(void) { return loopstartval;  }
-   static void loopstart(int tag, int type = 0) { loopstartval = type ? tag:(findTag(tag) + 1);  }
-   static int loopmax(void) { return loopmaxval;  }
-   static void loopmax(int tag, int type=0) { loopmaxval = type?tag:findTag(tag);  }
-	};
+	int loopstart(void);
+	void loopstart(int tag, int type = 0);
+	int loopmax(void);
+	void loopmax(int tag, int type = 0);
+};
 
 // your script
 extern SCRIPT script[];
