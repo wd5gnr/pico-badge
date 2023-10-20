@@ -27,7 +27,8 @@ Arduino_GFX *gfx = new Arduino_ST7789(bus, PIN_LCD_RST, 3, true, 320, 320, 0, 0,
 // The 2nd core reads buttons and puts them here
 // However, core 0 needs to reset them when read so do not
 // directly access buttons (see getbtns)
-volatile static uint16_t buttons = 0; // buttons read by processor #1
+// this is the one variable shared and protected with a critical section
+volatile  uint16_t buttons = 0; // buttons read by processor #1
 
 // Are there buttons waiting?
 int btn_pending(void) { return buttons!=0; }
@@ -45,20 +46,6 @@ uint16_t getbtns(void)
 }
 
 
-
-
-// Button pins
-static unsigned ipins[] = {BTNA, BTNB, BTNC, BTND, JUP, JDN, JLF, JRT, JPR};
-
-// Init pins for core #1
-static void initIO1()
-{
-	for (int i = 0; i < sizeof(ipins) / sizeof(ipins[0]); i++)
-	{
-		pinMode(ipins[i], INPUT_PULLUP);
-	}
-}
-
 // Init LCD core #0
 static void initIO()
 {
@@ -66,52 +53,6 @@ static void initIO()
 	digitalWrite(LCDBL, HIGH); // shouldn't be needed
 }
 
-// Read the buttons (call from core #1)
-static unsigned readpins(void)
-{
-	int i;
-	unsigned rv = 0, mask = 1;
-	for (i = 0; i < sizeof(ipins) / sizeof(ipins[0]);i++)
-	{
-		if (digitalRead(ipins[i]))
-			rv |= mask;
-		mask <<= 1;
-	}
-	return 0x1FF ^ rv;  // active low buttons so flip 'em
-}
-
-
-void setup1() // second core will handle buttons
-{
-	initIO1();
-}
-
-// Read buttons with short debounce delay
-static unsigned readdebounce(void)
-{
-	unsigned s1, s2;
-	s1 = readpins();
-	delay(33);  // debounce delay
-	s2 = readpins();
-	return s1 & s2;  // must be on both times
-}
-
-// Core #1 just reads the buttons
-// This code ensures that one button push gets one key event
-// to core #0 -- Again, idleOtherCore acts like a critical section
-void loop1()
-{
-	static unsigned btnstate = 0;
-	static unsigned xbtn;
-	unsigned cbutton;
-	cbutton = readdebounce();  // current buttons
-	xbtn = cbutton & ~btnstate;  // turn off any that were on before
-	btnstate = cbutton;   // ready for next time
-	rp2040.idleOtherCore();
-	buttons |= xbtn; // put in any that are set; client will reset them
-	rp2040.resumeOtherCore();
-	delay(5); // give other core some time to run
-}
 
 // Core #0 setup
 void setup()
@@ -216,7 +157,7 @@ void loop()
 			break;
 
 		case BWIMG:  // Show 240x240 mono image
-			gfx->drawBitmap(0, 0, script[i].data, 240, 240, WHITE, BLACK);
+			gfx->drawBitmap(0, 0, script[i].data, 240, 240, script[i].arg, script[i].arg2);
 			break;
 		case COLORIMG:  // Show 240x240 RGB565 image
 			// printf("Color\r\n");  // without this printf, (not serial.printf) the next call doesn't work?

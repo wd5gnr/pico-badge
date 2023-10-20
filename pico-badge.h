@@ -6,6 +6,7 @@
 #include <U8g2lib.h>  // for fonts
 #include <Arduino_GFX_Library.h>  // for graphics
 
+// Button pin numbers (users will use the masks in BADGE::)
 #define BTNA 15
 #define BTNB 17
 #define BTNC 19
@@ -24,17 +25,17 @@
 // Script commands
 typedef enum
 {
-	CLEAR,
-	TEXT,
-	TSIZE,
-	TCOLOR,
-	BWIMG,
-	COLORIMG,
-	MSDELAY,
-	ONOFF,
-	FONT,
-	TAG,
-	END
+	CLEAR,   // clear screen to color
+	TEXT,    // write text at x,y
+	TSIZE,   // Size of text
+	TCOLOR,  // color of text (fg==bg for transparent bg)
+	BWIMG,   // B&W image (with two set colors)
+	COLORIMG,  // color image (RGB565)
+	MSDELAY,  // delay in milliseconds (scaled)
+	ONOFF,    // display on/off
+	FONT,     // set font
+	TAG,      // label
+	END       // optional end
 } SCRIPTTYPE;
 
 // Each step of a script
@@ -47,7 +48,7 @@ typedef struct
 	int arg2;
 } SCRIPT;
 
-// Preprocessor macros to create script
+// Preprocessor macros to create script (see script.cpp for docs & example)
 #define Sbegin SCRIPT script[] = {
 #define Send \
     }        \

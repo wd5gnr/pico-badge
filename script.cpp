@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "pico-badge.h"
-#include <U8g2lib.h>   // needed for fonts
-#include <Arduino_GFX_Library.h>  // needed for colors
+#include <U8g2lib.h>             // needed for fonts
+#include <Arduino_GFX_Library.h> // needed for colors
 /* GNR-Badge script
 
 You can use the following commands (no semicolons). You can do some C code here (e.g., variables)
@@ -12,6 +12,7 @@ Commands:
 Stag(number) - Set tag number to identify this part of the script later
 Sclear(color) - Clears screen
 Sbwimg(imgarray) - Show 240x240 monochrome image
+S2img(imgarray, white, black) - Show 240x240 mono image with overrides for white and black color
 Simage(imgarray) - Show 240x240 RGB565 image
 Sdelay(ms) - Delay milliseconds (may be scaled)
 Stxtsixe(n) - Set text size multiplier
@@ -32,13 +33,14 @@ Sexit() - Not necessary at end, but useful if you want to end early for testing
 //  use GIMP to export them to a .C file (see notes.md)
 // Image must be mono or RGB565 and must be 240x240
 #include "wrencher.h"  // black and white
-#include "head2gimp.h"  // RGB565 image
-#include "qr-code.h"  // QR code for github
+#include "head2gimp.h" // RGB565 image
+#include "qr-code.h"   // QR code for github
 #include "monoback.h"  // two different backgrounds (black/white and white/black)
-#include "ncc1701.h"  // USS Enterprise
+#include "ncc1701.h"   // USS Enterprise
+#include "pcb.h"       // printed circuit board
 
 // setup
-int tdelay = 2000;
+int tdelay = 2000;  // minimum delay 2 seconds
 
 // clang-format off
 Sbegin
@@ -81,6 +83,12 @@ Sbegin
   Stext(150,180,"CON")
   Sdelay(tdelay)
 
+// Kermit wrencher
+  Stag(37)
+  S2img(wrencher,GREEN,BLACK)
+  Sdelay(tdelay)
+
+
 // Fancy name
   Stag(40)
   Sclear(BLUE)
@@ -105,6 +113,12 @@ Sbegin
   Stxttrans(BLACK)
   Stext(TCENTER,180,"Al Williams")
   Sdelay(tdelay)
+
+// PCB
+  Stag(70)
+  Simage(pcb)
+  Sdelay(tdelay)
+
   Stag(9999)     // Elliot's favorite EOF marker
 
 Send
@@ -118,9 +132,9 @@ BTNA_MASK, BTNB_MASK, BTNC_MASK, BTND_MASK (Button A, B, C, D)
 JUP_MASK, JDN_MASK, JLF_MASK, JRT_MASK, JPR_MASK (Joystick up, down, left, right, push)
 
 
-	void customize(int prepost, int &frame, unsigned max, unsigned buttons)
+  void customize(int prepost, int &frame, unsigned max, unsigned buttons)
 {
-	// pre=0 for before frame and 1 for after frame
+  // pre=0 for before frame and 1 for after frame
     // frame is current step (you can change it)
     // max is the maximum value for frame
     // buttons is the current state of the buttons (use readpins() to refresh )
@@ -134,6 +148,10 @@ void customize(int prepost, int &frame, unsigned max, unsigned buttons)
     while (buttons & BADGE::BTND_MASK)
         // do something for BTND
 }
+
+If you don't like putting BADGE:: in front of everything, try:
+using namespace BADGE;
+
 
 The BADGE object has helper functions:
 BADGE::getbtns(void) - Return current buttons (and clears them)
@@ -152,8 +170,7 @@ BADGE::unloop(void) - Cancel loop
 
 */
 
-
-#if 1    // custom vs no custom
+#if 1 // custom (1) vs no custom (0)
 /*
 A simple example custom file.
 
@@ -175,19 +192,26 @@ D - Resume from A, B, or C
 #define MAINFRAME 60
 #define MAINFREND 9999
 
-    void customize(int prepost, int &frame, unsigned max, unsigned cbuttons)
+void customize(int prepost, int &frame, unsigned max, unsigned cbuttons)
 {
+  static int first = 1;
+  if (first)
+  {
+    // initialize our stuff
+    first = 0;
+    BADGE::delayscaler(10); // force slowest speed (20 seconds)
+  }
   static unsigned sbuttons = 0;
   unsigned buttons;
   // If this is the post frame we just see if any buttons are pushed and bail
-  if (prepost==1)
+  if (prepost == 1)
   {
     sbuttons = cbuttons;
     return;
   }
-// everything from here out is on pre frame
+  // everything from here out is on pre frame
 
-  sbuttons |= cbuttons;  // mix pre with post
+  sbuttons |= cbuttons; // mix pre with post
   buttons = sbuttons;
   sbuttons = 0;
 
@@ -206,49 +230,51 @@ D - Resume from A, B, or C
   }
   if (buttons & BADGE::JPR_MASK)
   {
-    static int toggle= 0;  // press joystick down to toggle screen on/off
+    static int toggle = 0; // press joystick down to toggle screen on/off
     toggle ^= 1;
     if (toggle)
       BADGE::off();
     else
       BADGE::on();
   }
-  if (buttons & BADGE::JLF_MASK)  // joystick left go back to first frame
+  if (buttons & BADGE::JLF_MASK) // joystick left go back to first frame
   {
     frame = 0;
   }
-  if (buttons & BADGE::JUP_MASK)  // Up -- slower
+  if (buttons & BADGE::JUP_MASK) // Up -- slower
   {
     BADGE::delayscaler(1);
   }
-  if (buttons & BADGE::JDN_MASK)  // down -- faster
+  if (buttons & BADGE::JDN_MASK) // down -- faster
   {
     BADGE::delayscaler(-1);
   }
-  if (buttons & BADGE::BTNC_MASK) // Button C pause
+  if (buttons & BADGE::BTNC_MASK) // Button C toggle speed between 2s and 20s
   {
-    // need something for button C
+    static int toggle = 0;
+    toggle ^= 1;
+    BADGE::delayscaler(toggle ? -10 : 10); // minimum/maximum scale
   }
-  if (buttons & BADGE::BTND_MASK)  // Button D pause toggle
+  if (buttons & BADGE::BTND_MASK) // Button D pause toggle
   {
-    if (BADGE::pause()>=0)
+    if (BADGE::pause() >= 0)
     {
       BADGE::unpause();
       BADGE::unloop();
     }
-      else
-        BADGE::pausehere(frame);
-      return;
+    else
+      BADGE::pausehere(frame);
+    return;
   }
 
-// If BTN A we are going to run from MAINFRAME to MAINFREND
+  // If BTN A we are going to run from MAINFRAME to MAINFREND
   if (buttons & BADGE::BTNA_MASK)
   {
     frame = BADGE::findTag(MAINFRAME);
     BADGE::setloop(MAINFRAME, MAINFREND, 1);
     return;
   }
-// if BTN B we are to just pause on QRFRAME
+  // if BTN B we are to just pause on QRFRAME
   if (buttons & BADGE::BTNB_MASK)
   {
     BADGE::pause(QRFRAME);
@@ -260,4 +286,3 @@ D - Resume from A, B, or C
     NO_CUSTOM
 
 #endif
-

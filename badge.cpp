@@ -4,11 +4,13 @@
 #include "pico-badge.h"
 
 // This is the BADGE namespace that mainly offers services to the script
+// Older versions used a static class which works too
 
 namespace BADGE
 {
 
 	// all of these variables are private to the namespace
+	// The older versions used static/private variables for these
 	namespace
 	{
 		int dscale = 1; // delay scaling
@@ -18,27 +20,36 @@ namespace BADGE
 		int loopmaxval = -1;
 	}
 
-	int pause(void)
+	// function overloads give you a kind of property.
+	// v=X(); reads property X (for example, pause)
+	// X(100); sets property X to 100.
+
+	int pause(void)  // read pause
 	{
 		return pauseval;
-	}							  // read pause
+	}							  
+
 	void pause(int tag, int type) // set pause (type=0 is tag, non-zero is frame)
 	{
 		pauseval = type ? tag : (findTag(tag) + 1);
 	}
+
 	void unpause(void) // stop pause
 	{
 		pauseval = -1;
 	}
+
 	void unloop(void) // stop loop
 	{
 		loopstartval = loopmaxval = -1;
 	}
+
 	void pausehere(int n) // pause on frame number
 	{
 		pauseval = n;
 	};
-	// user probably doesn't need these
+
+	// user probably doesn't need these, but there are here anyway
 	int loopstart(void) { return loopstartval; }
 	void loopstart(int tag, int type) { loopstartval = type ? tag : (findTag(tag) + 1); }
 	int loopmax(void) { return loopmaxval; }
@@ -49,7 +60,7 @@ namespace BADGE
 	void scaledelay(unsigned n)
 	{
 		int i;
-		for (i = 0; i < n * dscale / 10; i++)
+		for (i = 0; i < (n * dscale) / 10; i++)
 		{
 			if (i % 10 && btn_pending())
 			{
@@ -68,6 +79,7 @@ namespace BADGE
 			dscale = 10;
 		else
 			dscale += offset;
+
 	}
 
 	// Give access to global getbtns...
