@@ -17,9 +17,13 @@
 #define JRT 20
 #define JPR 3
 
+// Waveshare 1.3 inch display
 #define LCDBL 13 // incorrect in board support?
-
-
+#define PIN_LCD_DC 8
+#define	PIN_LCD_CS 9
+#define	PIN_LCD_SCLK 10
+#define	PIN_LCD_MOSI 11
+#define PIN_LCD_RST 12
 
 
 // Script commands
